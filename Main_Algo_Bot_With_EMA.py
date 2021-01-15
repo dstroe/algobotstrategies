@@ -54,9 +54,12 @@ def generate_signals(df):
     signals["sma10"] = signals["close"].rolling(window=10).mean()
     signals["sma20"] = signals["close"].rolling(window=20).mean()
 
+    signals['ema12'] = signals["close"].ewm(span=12).mean()
+    signals['ema26'] = signals["close"].ewm(span=26).mean()
+    
     # Generate the trading signal 0 or 1,
     signals["signal"][short_window:] = np.where(
-        signals["sma10"][short_window:] > signals["sma20"][short_window:], 1.0, 0.0
+        signals["ema12"][short_window:] > signals["ema26"][short_window:], 1.0, 0.0
     )
 
     # Calculate the points in time at which a position should be taken, 1 or -1
@@ -101,7 +104,7 @@ def main():
         new_df = fetch_data()
         df = df.append(new_df, ignore_index=True)
 
-        min_window = 22
+        min_window = 28
 
         if df.shape[0] >= min_window:
             signals = generate_signals(df)
